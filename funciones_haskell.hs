@@ -1,61 +1,3 @@
-{-
-------------------
-LISTA DE FUNCIONES
-------------------
-
-esPar :: Integer -> Bool
-esMultiploDeN :: Integer -> Integer -> Bool
-esPrimo :: Int -> Bool
-siguientePrimo :: Int -> Int
-
-crearTupla:: a -> b -> (a, b)
-primeraComponente :: (a, b) -> a
-segundaComponente :: (a, b) -> b
-cambiarPosicion :: (a, b) -> (b, a)
-sonIgualesSinOrden :: Eq(t) => (t, t) -> (t, t) -> Bool
-componentesIguales :: Eq(t) => (t, t) -> Bool
-
-sonIguales :: Eq(t) => t -> t -> Bool
-estaEnLaTupla :: Eq(c) => c -> (c, c) -> Bool
-laOtraComponente :: Eq(t) => t -> (t,t) -> t
-primero :: tx -> ty -> tx
-segundo :: tx -> ty -> ty
-sumatoria :: [Int] -> Int
-longitud :: [t] -> Int
-ultimo :: [t] -> t
-principio :: [t] -> [t]
-reverso :: [t] -> [t]
-pertenece :: Eq(t) => t -> [t] -> Bool
-hayRepetidos :: (Eq t) => [t] -> Bool
-todosDistintos :: (Eq t) => [t] -> Bool
-todosIguales :: (Eq t) => [t] -> Bool
-agregarAlFinal :: t -> [t] -> [t]
-quitar :: (Eq t) => t -> [t] -> [t]
-quitarTodos :: (Eq t) => t -> [t] -> [t]
-eliminarRepetidos :: (Eq t) => [t] -> [t]
-mismosElementos :: (Eq t) => [t] -> [t] -> Bool
-capicua :: (Eq t) => [t] -> Bool
-valorMaximoEnListaZ :: [Integer] -> Integer
-valorMinimoEnListaZ :: [Integer] -> Integer
-sumarN :: Integer -> [Integer] -> [Integer]
-sumarElPrimero :: [Integer] -> [Integer] 
-sumarElUltimo :: [Integer] -> [Integer] 
-soloParesEnLista :: [Integer] -> [Integer]
-multiplosDeN :: Integer -> [Integer] -> [Integer]
-ocurrencias :: Eq(t) => t -> [t] -> Integer -> Integer
-sacarBlancosRepetidos :: [Char] -> [Char]
-contarPalabras :: [Char] -> Integer
-extraerPrimerPalabra :: [Char] -> [Char]
-borrarPrimerPalabra :: [Char] -> [Char]
-palabras :: [Char] -> [[Char]]
-palabraMasLarga :: [Char] -> [Char]
-aplanar :: [[Char]] -> [Char]
-aplanarConBlancos :: [[Char]] -> [Char]
-aplanarConNBlancos :: [[Char]] -> Integer -> [Char]
-sumaAcumulada :: (Num t) => [t] -> [t]
-descomponerEnPrimos :: [Integer] -> [[Integer]]
-
--}
 
 -- NUMEROS
 
@@ -80,26 +22,96 @@ esPar :: Integer -> Bool
 esPar z | z `mod` 2 == 0 = True
         | otherwise = False
 
-obtDivAux :: Integer -> Integer -> Integer --AUX
-obtDivAux 1 _ = 1
-obtDivAux p q | q == p = p
-              | (p `mod` q) == 0 = q
-              | (p `mod` q) /= 0 = obtDivAux p (q + 1)
 
-minDivAux :: Integer -> Integer --AUX
-minDivAux n = obtDivAux n (2)
+maxRegionesEnElPlano :: Integer -> Integer
+maxRegionesEnElPlano 0 = 1
+maxRegionesEnElPlano lineas_trazadas = (maxRegionesEnElPlano (lineas_trazadas - 1)) + lineas_trazadas
 
-esPrimo :: Integer -> Bool
-esPrimo 1 = False
-esPrimo n = n == minDivAux n
 
-siguientePrimo :: Integer -> Integer
-siguientePrimo primo | esPrimo(primo + 1) == True = (primo + 1)
-                     | esPrimo(primo + 1) == False = siguientePrimo(primo + 1)
+--PRIMOS
+divisoresDeN :: Integer -> Integer -> [Integer] --AUX
+divisoresDeN _ 1 = [1]
+divisoresDeN dividendo divisor | dividendo `mod` divisor == 0 = divisor:[] ++ (divisoresDeN dividendo (divisor - 1))
+                               | otherwise = [] ++ (divisoresDeN dividendo (divisor - 1))
+
+divisoresPrimosDeN :: Integer -> Integer -> [Integer] --AUX
+divisoresPrimosDeN _ 1 = []
+divisoresPrimosDeN dividendo divisor | not (esPrimo divisor) = [] ++ (divisoresPrimosDeN dividendo (divisor - 1))
+                                     | dividendo `mod` divisor == 0 = divisor:[] ++ (divisoresPrimosDeN dividendo (divisor - 1))
+                                     | otherwise = [] ++ (divisoresPrimosDeN dividendo (divisor - 1))
+
+esFactor :: Integer -> Integer -> Bool --AUX
+esFactor n p = mod n p == 0
+
+primosDeN :: Integer -> Integer -> [Integer] -> [Integer] --AUX
+primosDeN n _ _ | n <= 1 = []
+primosDeN n p lista_primos | esPrimo n = [n]
+                           | not (esFactor n p) = primosDeN n (siguientePrimo p) lista_primos 
+                           | (esFactor n p) && (esPrimo (div n p)) = lista_primos ++ [p, (div n p)]
+                           | (esFactor n p) && not (esPrimo (div n p)) = primosDeN (div n p) (p) ((p:) lista_primos)
+                           | otherwise = lista_primos  
+
+factoresPrimosDeN :: Integer -> [Integer] --PRIN
+factoresPrimosDeN n = divisoresPrimosDeN n n
+
+esPrimo :: Integer -> Bool --PRIN
+esPrimo n = (divisoresDeN n n) == [n, 1]
+
+siguientePrimo :: Integer -> Integer --PRIN
+siguientePrimo n | esPrimo (n + 1) = (n + 1)
+                 | otherwise = siguientePrimo (n + 1)
+
+anteriorPrimo :: Integer -> Integer --PRIN
+anteriorPrimo n | esPrimo (n - 1) = (n - 1)
+                | otherwise = anteriorPrimo (n - 1)
+
+listaDePrimosAnteriores :: Integer -> [Integer] --PRIN
+listaDePrimosAnteriores 1 = []
+listaDePrimosAnteriores n | esPrimo (n - 1) = (n - 1):[] ++ listaDePrimosAnteriores (n - 1)
+                          | otherwise = [] ++ listaDePrimosAnteriores (n - 1)
+
+descomponerEnPrimos :: [Integer] -> [[Integer]] --PRIN
+descomponerEnPrimos [] = []
+descomponerEnPrimos [x] = (primosDeN x 2 []) : []
+descomponerEnPrimos (x:xs) = (primosDeN x 2 []) : [] ++ descomponerEnPrimos xs
+
+
+--CONGRUENCIA
+sonCongruentes :: Integer -> Integer -> Integer -> Bool
+sonCongruentes a b n = mod (a - b) n == 0
+
+
+--COMBINACIONES
+factorial :: Integer -> Integer --AUX
+factorial n | n == 0 = 1
+            | otherwise = n * factorial (n-1)  
+
+numeroCombinatorio :: Integer -> Integer -> Integer --PRIN
+numeroCombinatorio n k | k > n = 0
+                       | otherwise = div (factorial n) ((factorial k)*(factorial (n - k)))
+
+
+--CONVERTIR NUMEROS A DISTINTAS BASES
+baseDecimalAOtraBase :: Integer -> Integer -> [Integer] -> [Integer] --AUX
+baseDecimalAOtraBase _ base _ | base > 10 = [0]
+baseDecimalAOtraBase n base res | n < base = (mod n base):res
+                            | n >= base = baseDecimalAOtraBase (div n base) base ((mod n base):res)
+
+otraBaseABaseDecimal :: [Integer] -> Integer -> Integer -> Integer --AUX
+otraBaseABaseDecimal _ base _ | base > 10 = 0
+otraBaseABaseDecimal [res] base n = n + res
+otraBaseABaseDecimal (res:restos) base n = otraBaseABaseDecimal restos base ((n + res) * base)
+
+
+baseDecimalABaseN :: Integer -> Integer -> [Integer] --PRIN
+baseDecimalABaseN n base = baseDecimalAOtraBase n base []
+
+baseNABaseDecimal :: [Integer] -> Integer -> Integer --PRIN
+baseNABaseDecimal n_ario base_n = otraBaseABaseDecimal n_ario base_n 0
+
 
 
 --TUPLAS
-
 productoEscalarR2 :: (Float, Float) -> (Float, Float) -> Float
 productoEscalarR2 (a, b) (c, d) = (a*c) + (b*d)
 
@@ -126,21 +138,6 @@ sonIgualesSinOrden (a, b) (c, d) | (a == c) && (b == d) = True
 componentesIguales :: Eq(t) => (t, t) -> Bool
 componentesIguales tupla = primeraComponente tupla == segundaComponente tupla
 
-
-
-
--- LISTAS
-
-pertenece :: Eq(t) => t -> [t] -> Bool
-pertenece _ [] = False
-pertenece e (x:xs) | e == x = True
-                   | e /= x = pertenece e xs
-                   | otherwise = False
-
-
-sonIguales :: Eq(t) => t -> t -> Bool
-sonIguales x y = x == y
-
 estaEnLaTupla :: Eq(c) => c -> (c, c) -> Bool
 estaEnLaTupla c (a,b) = (c == a) || (c == b)
 
@@ -148,30 +145,49 @@ laOtraComponente :: Eq(t) => t -> (t,t) -> t
 laOtraComponente componente (a, b) | componente == a = b
                                    | componente == b = a
 
+
+-- LISTAS
+primero :: [t] -> t
+primero (x:_) = x
+
+ultimo :: [t] -> t
+ultimo [x] = x
+ultimo (_:xs) = ultimo xs
+
+enesimo :: [t] -> Int -> t
+enesimo (x:_) 0 = x
+enesimo (_:xs) n = enesimo xs (n-1)
+
+longitud :: [t] -> Integer
+longitud [] = 0
+longitud [x] = 1
+longitud (x:xs) = 1 + longitud xs
+
+principio :: [t] -> [t]
+principio [] = []
+principio [_] = []
+principio (x:xs) = x:[] ++ principio xs
+
+alReves :: [t] -> [t]
+alReves [] = []
+alReves (x:xs) = alReves xs ++ [x]
+
+pertenece :: Eq(t) => t -> [t] -> Bool
+pertenece _ [] = False
+pertenece e [x] = e == x
+pertenece e (x:xs) | e /= x = pertenece e xs
+                   | otherwise = True 
+
+sonIguales :: Eq(t) => t -> t -> Bool
+sonIguales x y = x == y
+
 ocurrencias :: Eq(t) => t -> [t] -> Integer -> Integer 
 ocurrencias _ [] indice = indice
 ocurrencias e (x:xs) indice | e == x = ocurrencias e xs (indice + 1)
                             | otherwise = ocurrencias e xs indice
 
-primero :: tx -> ty -> tx
-primero x y = x
-
-segundo :: tx -> ty -> ty
-segundo x y = y
-
-
-longitud :: [t] -> Int 
-longitud (_:xs) = 1 + longitud xs
-
-
-ultimo :: [t] -> t 
-ultimo l = l!! ((longitud l) - 1)
-
-
-principio :: [t] -> [t]
-principio [_] = []
-principio (x:xs) = (x:(principio xs))
-
+ultimo2 :: [t] -> t 
+ultimo2 l = l!! ((longitud l) - 1)
 
 reverso :: [t] -> [t]
 reverso l | longitud l == 1 = l
@@ -182,18 +198,15 @@ todosIguales [] = True
 todosIguales [x] = True
 todosIguales (x:y:xs) = (x == y) && todosIguales (y:xs)
 
-
 todosDistintos :: (Eq t) => [t] -> Bool
 todosDistintos [] = True
 todosDistintos [x] = True
 todosDistintos (x:xs) = ((pertenece x xs) == False) && todosDistintos xs
 
-
 hayRepetidos :: (Eq t) => [t] -> Bool
 hayRepetidos l | todosIguales l == True = True
                | todosDistintos l == False = True
                | otherwise = False
-
 
 estaEnLaLista :: Eq(t) => t -> [t] -> Bool --AUX
 estaEnLaLista _ [] = False
@@ -212,12 +225,9 @@ quitarPrimerItem :: (Eq t) => t -> [t] -> [t] -> [t] --AUX
 quitarPrimerItem i (x:xs) lista_final | i /= x = quitarPrimerItem i xs (agregarAlFinal x lista_final)
                                       | i == x = lista_final ++ xs
 
-
-
 quitarTodos :: (Eq t) => t -> [t] -> [t]
 quitarTodos item lista | not (estaEnLaLista item lista) = lista
                        | (estaEnLaLista item lista) = quitarTodos item (quitar item lista)
-
 
 eliminarRepetidos :: (Eq t) => [t] -> [t]
 eliminarRepetidos [] = []
@@ -313,7 +323,6 @@ ordenarDecreciente:: [Integer] -> [Integer] --AUX
 ordenarDecreciente [x] = [x]
 ordenarDecreciente s = valorMaximoEnListaZ s : ordenarDecreciente (quitar (valorMaximoEnListaZ s) s)
 
-
 sacarBlancosRepetidos :: [Char] -> [Char]
 sacarBlancosRepetidos [] = []
 sacarBlancosRepetidos [x] = [x]
@@ -365,12 +374,10 @@ aplanar :: [[Char]] -> [Char]
 aplanar [] = []
 aplanar (x:xs) = x ++ (aplanar xs)
 
-
 aplanarConBlancos :: [[Char]] -> [Char]
 aplanarConBlancos [] = []
 aplanarConBlancos [x] = x
 aplanarConBlancos (x:xs) = x ++ [' '] ++ (aplanarConBlancos xs)
-
 
 aplanarConNBlancos :: [[Char]] -> Integer -> [Char]
 aplanarConNBlancos [] _ = []
@@ -380,7 +387,6 @@ aplanarConNBlancos (x:xs) n = x ++ (nBlancos n) ++ (aplanarConNBlancos xs n)
 nBlancos :: Integer -> [Char] --AUX
 nBlancos n | n == 0 = []
            | otherwise = [' '] ++ nBlancos (n-1)
-
 
 sumaAcumulada :: (Num t) => [t] -> [t]
 sumaAcumulada [] = []
@@ -392,18 +398,21 @@ sumaAcuAux [x] val = [x + val]
 sumaAcuAux (x:xs) val = (x + val): sumaAcuAux xs (val + x) 
 
 
-descomponerEnPrimos :: [Integer] -> [[Integer]]
-descomponerEnPrimos [] = []
-descomponerEnPrimos [x] = (primosDeN x 2 []) : []
-descomponerEnPrimos (x:xs) = (primosDeN x 2 []) : [] ++ descomponerEnPrimos xs
+--TRIANGULO DE PASCAL
+pascal :: Integer -> IO()
+pascal n = mapM_ print (coeficientesPascal n)
 
-primosDeN :: Integer -> Integer -> [Integer] -> [Integer] --AUX
-primosDeN n p lista_primos | esPrimo n = [n]
-                           | not (esFactor n p) = primosDeN n (siguientePrimo p) lista_primos 
-                           | (esFactor n p) && (esPrimo (div n p)) = lista_primos ++ [p, (div n p)]
-                           | (esFactor n p) && not (esPrimo (div n p)) = primosDeN (div n p) (p) ((p:) lista_primos)
-                           | otherwise = lista_primos
-                               
-esFactor :: Integer -> Integer -> Bool --AUX
-esFactor n p = mod n p == 0
+coeficientesPascal :: Integer -> [[Integer]] --AUX
+coeficientesPascal 0 = [[1]]
+coeficientesPascal n = [[1]] ++ (generarListaDeListas [1] n) 
 
+generarListaDeListas :: [Integer] -> Integer-> [[Integer]] --AUX
+generarListaDeListas lista 0 = []
+generarListaDeListas lista i = (unirListaDeCoeficientes lista):[] ++ generarListaDeListas (unirListaDeCoeficientes lista) (i - 1)
+
+unirListaDeCoeficientes :: [Integer] -> [Integer] --AUX
+unirListaDeCoeficientes (x:xs) = [x] ++ listaDeCoeficientes (x:xs)
+
+listaDeCoeficientes :: [Integer] -> [Integer] --AUX
+listaDeCoeficientes [_] = [1]
+listaDeCoeficientes (x:xs) = ((x + (head xs)):)[] ++ (listaDeCoeficientes xs)
