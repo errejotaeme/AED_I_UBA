@@ -327,7 +327,8 @@ def distancia(lat_a,long_a, lat_b, long_b) -> str:
              math.sin(d_long/2)**2)
         y:float = 2*math.atan2(math.sqrt(x), math.sqrt(1 - x))     
         res = radio_tierra * y
-        return f'{round(res, 3)} kilómetros'
+    
+    return f'{round(res, 3)} kilómetros'
 
 
 # NÚMEROS COMPLEJOS  
